@@ -15,9 +15,9 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
 
     // Process data to extract station coordinates and ridership
     data.forEach(record => {
-      const fromStation = record.to_station_name;
+      const fromStation = record.from_station_name;
       const toStation = record.to_station_name;
-      const ridership = parseFloat(record.ridership_estimate);
+      const ridership = parseInt(record.ridership_estimate);
       const fromLat = parseFloat(record.from_station_latitude);
       const fromLng = parseFloat(record.from_station_longitude);
       const toLat = parseFloat(record.to_station_latitude);
@@ -65,15 +65,15 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
     animateRidership();
       
     function getRidershipColor(ridership){
-      return ridership > 1000.0 ? '#FF5733' :
-        ridership > 500.0 ? '#FFC300' :
-        ridership > 100.0 ? '#DAF7A6' :
+      return ridership > 1000 ? '#FF5733' :
+        ridership > 500 ? '#FFC300' :
+        ridership > 100 ? '#DAF7A6' :
         '#C70039';
     }
     function getRidershipWeight(ridership){
-      return ridership > 1000.0 ? 5 :
-        ridership > 500.0 ? 3 :
-        ridership > 100.0 ? 2 :
+      return ridership > 1000 ? 5 :
+        ridership > 500 ? 3 :
+        ridership > 100 ? 2 :
         1;
     }
     
