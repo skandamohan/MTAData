@@ -36,7 +36,7 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
         ridership: ridership
       });
 
-    });/*
+    });
     // Function to animate ridership between stations
     let currentTime = 0;
     function animateRidership(){
@@ -61,7 +61,7 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
         currentTime++;
         setTimeout(animateRidership, 500); Animate every half second
       }
-    }
+    }/*
     function getRidershipColor(ridership){
       return ridership > 1000.0 ? '#FF5733' :
         ridership > 500.0 ? '#FFC300' :
