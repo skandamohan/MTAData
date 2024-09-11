@@ -59,7 +59,7 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
           }
         });
         currentTime++;
-        setTimeout(animateRidership, 500); Animate every half second
+        setTimeout(animateRidership, 500); //Animate every half second
       }
     }
     animateRidership();
