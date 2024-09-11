@@ -61,7 +61,9 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
         currentTime++;
         setTimeout(animateRidership, 500); Animate every half second
       }
-    }/*
+    }
+    animateRidership();
+      
     function getRidershipColor(ridership){
       return ridership > 1000.0 ? '#FF5733' :
         ridership > 500.0 ? '#FFC300' :
@@ -75,8 +77,7 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
         1
     }
     
-  //Start animation
-    animateRidership();
-    */
+
+    
     
   }).catch(err => console.error('Error fetching data:', err));
