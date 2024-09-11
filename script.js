@@ -5,7 +5,7 @@ var map = L.map('map').setView([40.7128, -74.0060], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
     maxZoom: 18,
 }).addTo(map);
-
+/*
 //Fetch the data from the api
 fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
   .then(response => response.json())
@@ -79,4 +79,4 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
     animateRidership();
     
     
-  }).catch(err => console.error('Error fetching data:', err));
+  }).catch(err => console.error('Error fetching data:', err));*/
