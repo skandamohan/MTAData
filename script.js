@@ -12,7 +12,7 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
   .then(data => {
       let stationCoords = {}; //Store station coordinates
       let ridershipData = []; //Store ridership flows
-/*
+
     // Process data to extract station coordinates and ridership
     data.forEach(record => {
       const fromStation = record.to_station_name;
@@ -36,7 +36,7 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
         ridership: ridership
       });
 
-    });
+    });/*
     // Function to animate ridership between stations
     let currentTime = 0;
     function animateRidership(){
