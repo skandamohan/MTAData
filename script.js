@@ -68,13 +68,13 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
       return ridership > 1000.0 ? '#FF5733' :
         ridership > 500.0 ? '#FFC300' :
         ridership > 100.0 ? '#DAF7A6' :
-        '#C70039'
+        '#C70039';
     }
     function getRidershipWeight(ridership){
       return ridership > 1000.0 ? 5 :
         ridership > 500.0 ? 3 :
         ridership > 100.0 ? 2 :
-        1
+        1;
     }
     
 
