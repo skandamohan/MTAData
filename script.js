@@ -24,7 +24,7 @@ function addRoutesToMap(data) {
     // Create a layer for the routes
     const routeLayer = L.geoJSON(null).addTo(map);
     
-    data.features.forEach((feature, index) => {
+    data.forEach((feature, index) => {
         L.geoJSON(feature, {
             style: {
                 weight: getWeight(feature.properties.ridership),
@@ -56,7 +56,7 @@ function updateWeights(layer, data) {
     layer.clearLayers(); // Clear existing routes
 
     // Re-add routes with updated weights
-    data.features.forEach((feature, index) => {
+    data.forEach((feature, index) => {
         L.geoJSON(feature, {
             style: {
                 weight: getWeight(feature.properties.ridership),
