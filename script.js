@@ -17,11 +17,11 @@ fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
         data.forEach(record => {
             const fromStation = record.from_station_name;
             const toStation = record.to_station_name;
-            const ridership = parseInt(record.ridership_estimate);
-            const fromLat = parseFloat(record.from_station_latitude);
-            const fromLng = parseFloat(record.from_station_longitude);
-            const toLat = parseFloat(record.to_station_latitude);
-            const toLng = parseFloat(record.to_station_longitude);
+            const ridership = parseInt(record.estimated_average_ridership);
+            const fromLat = parseFloat(record.origin_latitude);
+            const fromLng = parseFloat(record.origin_longitude);
+            const toLat = parseFloat(record.destination_latitude);
+            const toLng = parseFloat(record.destination_longitude);
             
             if (!stationCoords[fromStation]) {
                 stationCoords[fromStation] = [fromLat, fromLng];
