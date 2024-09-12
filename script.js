@@ -11,38 +11,22 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
     .then(response => response.json())
     .then(data => {
-        // Generate unique colors for each route
-        const routeColors = generateUniqueColors(data.features.length);
-
-        // Add all routes to the map with unique colors
-        addRoutesToMap(data, routeColors);
+        // Add all routes to the map
+        addRoutesToMap(data);
 
         // Start the animation to update route weights
-        startAnimation(data, routeColors);
+        startAnimation(data);
     })
     .catch(error => console.error('Error fetching data:', error));
 
-// Function to generate unique colors for routes
-function generateUniqueColors(numColors) {
-    const colors = [];
-    for (let i = 0; i < numColors; i++) {
-        // Generate a unique color (e.g., using a color wheel)
-        const hue = (i / numColors) * 360;
-        colors.push(`hsl(${hue}, 100%, 50%)`);
-    }
-    return colors;
-}
-
 // Function to add all routes to the map
-function addRoutesToMap(data, routeColors) {
+function addRoutesToMap(data) {
     // Create a layer for the routes
     const routeLayer = L.geoJSON(null).addTo(map);
     
-    // Add each route with its unique color
     data.features.forEach((feature, index) => {
         L.geoJSON(feature, {
             style: {
-                color: routeColors[index],
                 weight: getWeight(feature.properties.ridership),
                 opacity: 0.8
             }
@@ -56,26 +40,25 @@ function getWeight(ridership) {
 }
 
 // Function to start the animation
-function startAnimation(data, routeColors) {
+function startAnimation(data) {
     const routeLayer = L.geoJSON(null).addTo(map);
     routeLayer.addData(data);
 
     // Update weights periodically
     const updateInterval = 60000; // Update every minute (60000 milliseconds)
     setInterval(() => {
-        updateWeights(routeLayer, data, routeColors);
+        updateWeights(routeLayer, data);
     }, updateInterval);
 }
 
 // Function to update the weights of routes
-function updateWeights(layer, data, routeColors) {
+function updateWeights(layer, data) {
     layer.clearLayers(); // Clear existing routes
 
     // Re-add routes with updated weights
     data.features.forEach((feature, index) => {
         L.geoJSON(feature, {
             style: {
-                color: routeColors[index],
                 weight: getWeight(feature.properties.ridership),
                 opacity: 0.8
             }
