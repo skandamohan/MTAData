@@ -7,21 +7,26 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a> | &copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
 
+// Variables to hold data and map layers
+let geojson = null;
+let routeColors = [];
+let hourlyData = {};
+let currentTimeIndex = 0;
+let currentDate = new Date(); // Current date and time for simulation
+
 // Fetch the data from the provided URL
 fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
     .then(response => response.json())
     .then(data => {
         // Convert the data to GeoJSON format
-        const geojson = convertToGeoJSON(data);
+        geojson = convertToGeoJSON(data);
+        routeColors = generateUniqueColors(geojson.features.length);
 
-        // Generate unique colors for each route
-        const routeColors = generateUniqueColors(geojson.features.length);
+        // Prepare data for each hour and date
+        prepareHourlyData();
 
-        // Add routes to the map
-        addRoutesToMap(geojson, routeColors);
-
-        // Optionally, you can add dynamic animation for updating weights
-        // For demonstration purposes, we're not adding dynamic animation here
+        // Start the animation
+        startAnimation();
     })
     .catch(error => console.error('Error fetching data:', error));
 
@@ -35,6 +40,7 @@ function convertToGeoJSON(data) {
                 origin: item.origin_station_complex_name,
                 destination: item.destination_station_complex_name,
                 ridership: parseFloat(item.estimated_average_ridership),
+                timestamp: new Date(item.timestamp),
                 index: index // Keep track of index for color mapping
             },
             geometry: {
@@ -48,15 +54,34 @@ function convertToGeoJSON(data) {
     };
 }
 
+// Prepare hourly data
+function prepareHourlyData() {
+    geojson.features.forEach(feature => {
+        const timeKey = feature.properties.timestamp.toISOString();
+        if (!hourlyData[timeKey]) {
+            hourlyData[timeKey] = [];
+        }
+        hourlyData[timeKey].push(feature);
+    });
+}
+
 // Add routes to the map with unique colors
-function addRoutesToMap(geojson, routeColors) {
-    L.geoJSON(geojson, {
+function addRoutesToMap(features) {
+    const routeLayer = L.layerGroup().addTo(map);
+
+    // Add routes for the current time
+    L.geoJSON({
+        type: 'FeatureCollection',
+        features: features
+    }, {
         style: feature => ({
             color: routeColors[feature.properties.index],
             weight: getWeight(feature.properties.ridership),
             opacity: 0.8
         })
-    }).addTo(map);
+    }).addTo(routeLayer);
+
+    return routeLayer;
 }
 
 // Function to get weight based on ridership
@@ -73,3 +98,30 @@ function generateUniqueColors(numColors) {
     }
     return colors;
 }
+
+// Function to start the animation
+function startAnimation() {
+    let routeLayer = addRoutesToMap(hourlyData[Object.keys(hourlyData)[currentTimeIndex]]);
+
+    setInterval(() => {
+        // Clear existing routes
+        routeLayer.clearLayers();
+
+        // Update current time
+        const timeKeys = Object.keys(hourlyData);
+        currentTimeIndex = (currentTimeIndex + 1) % timeKeys.length;
+        const currentTimeKey = timeKeys[currentTimeIndex];
+        const features = hourlyData[currentTimeKey];
+
+        // Add new routes for the updated time
+        routeLayer = addRoutesToMap(features);
+
+        // Simulate passage of one second in real time
+        currentDate.setSeconds(currentDate.getSeconds() + 1);
+
+    }, 1000); // Update every second (1000 milliseconds)
+}
+
+// Initialize and display routes
+prepareHourlyData(); // Prepare data before starting the animation
+startAnimation();
