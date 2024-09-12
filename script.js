@@ -10,20 +10,25 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
 // Variables to hold data and map layers
 let geojson = null;
 let routeColors = [];
-let hourlyData = {};
-let currentTimeIndex = 0;
-let currentDate = new Date(); // Current date and time for simulation
+let scheduleData = {};
+let currentPeriod = null;
+let currentHourIndex = 0;
+let currentDayIndex = 0;
+let currentMonthIndex = 0;
+let currentYearIndex = 0;
+let periodKeys = [];
+let dayKeys = [];
+let monthKeys = [];
+let yearKeys = [];
 
 // Fetch the data from the provided URL
 fetch('https://data.ny.gov/resource/jsu2-fbtj.json')
     .then(response => response.json())
     .then(data => {
-        // Convert the data to GeoJSON format
+        // Convert the data to GeoJSON format and prepare for animation
         geojson = convertToGeoJSON(data);
         routeColors = generateUniqueColors(geojson.features.length);
-
-        // Prepare data for each hour and date
-        prepareHourlyData();
+        prepareScheduleData();
 
         // Start the animation
         startAnimation();
@@ -41,6 +46,10 @@ function convertToGeoJSON(data) {
                 destination: item.destination_station_complex_name,
                 ridership: parseFloat(item.estimated_average_ridership),
                 timestamp: new Date(item.timestamp),
+                year: item.year,
+                month: item.month,
+                day_of_week: item.day_of_week,
+                hour_of_day: item.hour_of_day,
                 index: index // Keep track of index for color mapping
             },
             geometry: {
@@ -54,22 +63,39 @@ function convertToGeoJSON(data) {
     };
 }
 
-// Prepare hourly data
-function prepareHourlyData() {
+// Prepare the schedule data
+function prepareScheduleData() {
+    // Group data by year, month, day_of_week, and hour_of_day
     geojson.features.forEach(feature => {
-        const timeKey = feature.properties.timestamp.toISOString();
-        if (!hourlyData[timeKey]) {
-            hourlyData[timeKey] = [];
+        const key = `${feature.properties.year}-${feature.properties.month}-${feature.properties.day_of_week}-${feature.properties.hour_of_day}`;
+        if (!scheduleData[key]) {
+            scheduleData[key] = [];
         }
-        hourlyData[timeKey].push(feature);
+        scheduleData[key].push(feature);
     });
+
+    // Extract unique periods and order them
+    periodKeys = Object.keys(scheduleData).sort();
+    const firstKey = periodKeys[0];
+    const { year, month, day_of_week } = parsePeriodKey(firstKey);
+
+    // Initialize indices for animation
+    yearKeys = [...new Set(periodKeys.map(key => key.split('-')[0]))].sort();
+    monthKeys = [...new Set(periodKeys.map(key => key.split('-')[1]))].sort();
+    dayKeys = [...new Set(periodKeys.map(key => key.split('-')[2]))].sort();
+}
+
+// Parse period key into components
+function parsePeriodKey(key) {
+    const [year, month, day_of_week, hour_of_day] = key.split('-');
+    return { year, month, day_of_week, hour_of_day };
 }
 
 // Add routes to the map with unique colors
 function addRoutesToMap(features) {
     const routeLayer = L.layerGroup().addTo(map);
 
-    // Add routes for the current time
+    // Add routes for the current period
     L.geoJSON({
         type: 'FeatureCollection',
         features: features
@@ -101,27 +127,42 @@ function generateUniqueColors(numColors) {
 
 // Function to start the animation
 function startAnimation() {
-    let routeLayer = addRoutesToMap(hourlyData[Object.keys(hourlyData)[currentTimeIndex]]);
+    let routeLayer = addRoutesToMap(scheduleData[periodKeys[currentHourIndex]]);
 
     setInterval(() => {
         // Clear existing routes
         routeLayer.clearLayers();
 
-        // Update current time
-        const timeKeys = Object.keys(hourlyData);
-        currentTimeIndex = (currentTimeIndex + 1) % timeKeys.length;
-        const currentTimeKey = timeKeys[currentTimeIndex];
-        const features = hourlyData[currentTimeKey];
+        // Update to the next hour
+        currentHourIndex++;
+        if (currentHourIndex >= periodKeys.length) {
+            currentHourIndex = 0;
+            currentDayIndex++;
+            if (currentDayIndex >= dayKeys.length) {
+                currentDayIndex = 0;
+                currentMonthIndex++;
+                if (currentMonthIndex >= monthKeys.length) {
+                    currentMonthIndex = 0;
+                    currentYearIndex++;
+                    if (currentYearIndex >= yearKeys.length) {
+                        currentYearIndex = 0;
+                    }
+                }
+            }
+        }
 
-        // Add new routes for the updated time
-        routeLayer = addRoutesToMap(features);
-
-        // Simulate passage of one second in real time
-        currentDate.setSeconds(currentDate.getSeconds() + 1);
+        const year = yearKeys[currentYearIndex];
+        const month = monthKeys[currentMonthIndex];
+        const day_of_week = dayKeys[currentDayIndex];
+        const periodKey = `${year}-${month}-${day_of_week}-${periodKeys[currentHourIndex].split('-')[3]}`;
+        
+        if (scheduleData[periodKey]) {
+            routeLayer = addRoutesToMap(scheduleData[periodKey]);
+        }
 
     }, 1000); // Update every second (1000 milliseconds)
 }
 
 // Initialize and display routes
-prepareHourlyData(); // Prepare data before starting the animation
+prepareScheduleData(); // Prepare data before starting the animation
 startAnimation();
