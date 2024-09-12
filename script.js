@@ -27,7 +27,7 @@ function addRoutesToMap(data) {
     data.forEach((feature, index) => {
         L.geoJSON(feature, {
             style: {
-                weight: getWeight(feature.properties.ridership),
+                weight: getWeight(feature.estimated_average_ridership),
                 opacity: 0.8
             }
         }).addTo(routeLayer);
